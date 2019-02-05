@@ -12,7 +12,8 @@ risP3:		.space 32
 JAT:		.space 16 	#jump address table da 4 posti
 
 .text
-	li $s0,0        	#inizializzazione offset (istante t)		
+	li $s0,0        	#inizializzazione offset (istante t)
+	li $t8,0		
 #*******open file*********
 	la $a0,filePathP1
 	jal openFile
@@ -63,38 +64,41 @@ getVal:
 	
 #casi
 P0:	li $t5,48		#48(base 10) è "0" in ASCII
-	sb $t5,risP1($s0)
+	sb $t5,risP1($t8)
 	li $t5,48		
-	sb $t5,risP2($s0)
+	sb $t5,risP2($t8)
 	li $t5,48		
-	sb $t5,risP3($s0)
+	sb $t5,risP3($t8)
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4		#incremento contatore
 	j getVal
 	
 P1:	li $t5,48		
-	sb $t5,risP1($s0)
+	sb $t5,risP1($t8)
 	li $t5,48		
-	sb $t5,risP2($s0)
+	sb $t5,risP2($t8)
 	li $t5,49		
-	sb $t5,risP3($s0)
+	sb $t5,risP3($t8)
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4		#incremento contatore
 	j getVal
 	
 P2: 	li $t5,48		
-	sb $t5,risP1($s0)
+	sb $t5,risP1($t8)
 	li $t5,49		
-	sb $t5,risP2($s0)
+	sb $t5,risP2($t8)
 	li $t5,49		
-	sb $t5,risP3($s0)
+	sb $t5,risP3($t8)
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4		#incremento contatore
 	j getVal
 	
 P3: 	li $t5,49		
-	sb $t5,risP1($s0)
+	sb $t5,risP1($t8)
 	li $t5,49		
-	sb $t5,risP2($s0)
+	sb $t5,risP2($t8)
 	li $t5,49		
-	sb $t5,risP3($s0)
+	sb $t5,risP3($t8)
 	addi $s0,$s0,4		#incremento contatore
 	j getVal
 

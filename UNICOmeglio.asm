@@ -1,7 +1,7 @@
 .data
 valuesS:	.word 1,9,89,88,79,23,4,11
 valuesP:	.word -8,90,95,-78,0,66,60,18,56,28
-valuesD:	.word 0xB34, 0xB21, 0xB10, 0xA07, 0xA07, 0xB97, 0xB97, 0xA13
+valuesD:	.word 0xB34, 0xB21, 0xB10, 0xA07, 0xA07, 0xB11, 0xB11, 0xB11
 filePathS:	.asciiz   "correttezzasterzoOUT.txt"
 filePathP:	.asciiz   "correttezzapendenzaOUT.txt"
 filePathD:	.asciiz   "correttezzadistanzaOUT.txt"
@@ -15,10 +15,11 @@ risD:	.space 32
 	
 #vvvvSTERZOvvvvvvv
 	li $s0,0        	#inizializzazione offset (istante t)
-	la $t5,risS	
+	la $t5,risS
+	li $t8,0	#offset stringa risultati
 SgetVal:	beq $s0,32,pendenza	#se s0= (numero di valori)*4 allora li ho letti tutti e smetto [32=(8)*4]
 	lw $s2,valuesS($s0)	#in s2 metto il valore all'istante t(attuale)
-	beqz $s0,stVal	#controllo se è il primo valore
+	beqz $s0,Scorr1	#controllo se è il primo valore
 	#***** if((val-preVal>10)||(val-preVal<-10))
 	sub $t1,$s2,$s1	#esegue la sottrazione tra il valore attuale e quello all'istante precedente
 	sgt $t2,$t1,10	#t2=1 se val-preVal>10
@@ -28,20 +29,22 @@ SgetVal:	beq $s0,32,pendenza	#se s0= (numero di valori)*4 allora li ho letti tut
 	beqz $t1,Scorr1
 	j Scorr0
 	
-stVal:	move $s1,$s2	#sposto il valore corrente in s1 che conterrà il valore all'istante t-1
-	addi $s0,$s0,4	#incrementa l'istante
-	j SgetVal		#non stampo nulla perchè non lo posso confrontare
+#stVal:	move $s1,$s2	#sposto il valore corrente in s1 che conterrà il valore all'istante t-1
+#	addi $s0,$s0,4	#incrementa l'istante
+#	j SgetVal		#non stampo nulla perchè non lo posso confrontare
 
 
 Scorr0:	#mette a 0
 	li $t4,48		#48(base 10) è "0" in ASCII
-	sb $t4,risS($s0)	#carica "0" 
+	sb $t4,risS($t8)	#carica "0" 
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4	#incrementa l'istante
 	move $s1,$s2	#mette il valore attuale in s1 che contiene il "valore precedente"
 	j SgetVal		
 Scorr1:	#mette a 1 
 	li $t4,49		#49(base 10) è "1" in ASCII
-	sb $t4,risS($s0)	#carica "1"
+	sb $t4,risS($t8)	#carica "1"
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4	#incrementa l'istante
 	move $s1,$s2	#mette il valore attuale in s1 che contiene il "valore precedente"
 	j SgetVal
@@ -51,6 +54,7 @@ Scorr1:	#mette a 1
 #vvvvvvvvvPENDENZAvvvvvvvvvvv
 pendenza:	li $s0,0        	#inizializzazione offset (istante t)
 	la $t5,risP
+	li $t8,0
 PgetVal:	beq $s0,40,distanza	#se s0= (numero di valori)*4 allora li ho letti tutti e smetto [36=(8)*4]
 	lw $s2,valuesP($s0)	#in s2 metto il valore all'istante t(attuale)
 	#***** if((val>-60)&&(val<60))
@@ -63,12 +67,14 @@ PgetVal:	beq $s0,40,distanza	#se s0= (numero di valori)*4 allora li ho letti tut
 
 Pcorr0:	#mette a 0
 	li $t4,48		#48(base 10) è "0" in ASCII
-	sb $t4,risP($s0)	#carica "0" 
+	sb $t4,risP($t8)	#carica "0" 
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4	#incrementa l'istante
 	j PgetVal		
 Pcorr1:	#mette a 1 
 	li $t4,49		#49(base 10) è "1" in ASCII
-	sb $t4,risP($s0)	#carica "1"
+	sb $t4,risP($t8)	#carica "1"
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4	#incrementa l'istante
 	j PgetVal
 	
@@ -76,9 +82,12 @@ Pcorr1:	#mette a 1
 
 #vvvvvvDISTANZAvvvvvvvvvvv
 
-distanza:	li $s0,0        	#inizializzazione offset (istante t)
+distanza:	
+	li $s0,0        	#inizializzazione offset (istante t)
 	la $t5,risD
-DgetVal:	la $t0,valuesD($s0)
+	li $t8,0
+DgetVal:		
+	la $t0,valuesD($s0)
 	lb $s1,0($t0)	#metto in s1 la cifra
 	lb $s2,1($t0)	#metto in s2 la lettera
 			#t0 non mi serve più, quindi lo posso riutilizzare
@@ -96,12 +105,14 @@ DgetVal:	la $t0,valuesD($s0)
 	
 Dcorr0:	#mette a 0
 	li $t4,48		#48(base 10) è "0" in ASCII
-	sb $t4,risD($s0)
+	sb $t4,risD($t8)
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4
 	j DgetVal
 Dcorr1:	#mette a 1 
 	li $t4,49		#49(base 10) è "1" in ASCII
-	sb $t4,risD($s0)
+	sb $t4,risD($t8)
+	addi $t8,$t8,2		#incremento l'offset (stringa risultati)
 	addi $s0,$s0,4
 	j DgetVal
 	
