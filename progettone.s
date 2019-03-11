@@ -1,5 +1,5 @@
 #GRUPPO DI LAVORO
-# Gianmarco Franchi	Email:
+# Gianmarco Franchi	Email: gianmarco.franchi1@stud.unifi.it
 # Niccolo' Mazzi	Email: niccolo.mazzi@stud.unifi.it
 # Chiara Saccone Territo'	Email: chiara.saccone@stud.unifi.it
 #
@@ -571,4 +571,8 @@ exit:
 	lw $s1, 8($sp)
 	lw $s2, 12($sp)
 	addi $sp, $sp, 16
-	jr $ra
+	
+	li $v0,10
+	syscall
+	
+	#jr $ra
